@@ -12,28 +12,38 @@ import {
 import ThunderforestMap from '../components/ThunderforestMap';
 
 const HomeScreen = ({ navigation }: any) => {
-  const [latitude, setLatitude] = useState('22.5726');
-  const [longitude, setLongitude] = useState('88.3639');
 
-  const [location, setLocation] = useState({
-    lat: 22.5726,
-    lng: 88.3639,
-  });
+  const [points, setPoints] = useState([
+  {
+    lat: '',
+    lng: '',
+  },
+]);
 
-  const handleShowLocation = () => {
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
+// For demonstration, this function adds a new point to the list of points.
+  const addPoint = () => {
+  setPoints(prev => [
+    ...prev,
+    {
+      lat: '',
+      lng: '',
+    },
+  ]);
+};
 
-    if (isNaN(lat) || isNaN(lng)) {
-      return;
-    }
-
-    setLocation({
-      lat,
-      lng,
-    });
-  };
-
+// This function converts the list of points into a format suitable for rendering a polygon on the map.
+const polygonPoints = points
+  .filter(
+    p =>
+      p.lat.trim() !== '' &&
+      p.lng.trim() !== '' &&
+      !isNaN(Number(p.lat)) &&
+      !isNaN(Number(p.lng)),
+  )
+  .map(p => [
+    Number(p.lat),
+    Number(p.lng),
+  ]) as number[][];
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>User Directory App</Text>
@@ -59,37 +69,49 @@ const HomeScreen = ({ navigation }: any) => {
 
       <Text style={styles.mapTitle}>Enter Location </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Latitude"
-        value={latitude}
-        onChangeText={setLatitude}
-        keyboardType="numeric"
-      />
+{points.map((point, index) => (
+  <View key={index}>
+    <Text style={{ fontWeight: '700' }}>
+      Location {index + 1}
+    </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Longitude"
-        value={longitude}
-        onChangeText={setLongitude}
-        keyboardType="numeric"
-      />
+    <TextInput
+      style={styles.input}
+      placeholder="Latitude"
+      value={point.lat}
+      onChangeText={text => {
+        const copy = [...points];
+        copy[index].lat = text;
+        setPoints(copy);
+      }}
+    />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleShowLocation}
-      >
-        <Text style={styles.buttonText}>
-          Show Location
-        </Text>
-      </TouchableOpacity>
+    <TextInput
+      style={styles.input}
+      placeholder="Longitude"
+      value={point.lng}
+      onChangeText={text => {
+        const copy = [...points];
+        copy[index].lng = text;
+        setPoints(copy);
+      }}
+    />
+  </View>
+))}
+
+<TouchableOpacity
+  style={styles.button}
+  onPress={addPoint}
+>
+  <Text style={styles.buttonText}>
+    Add Point
+  </Text>
+</TouchableOpacity>
 
       <View style={{ height: 400 }}>
-        <ThunderforestMap
-          key={`${location.lat}-${location.lng}`}
-          latitude={location.lat}
-          longitude={location.lng}
-        />
+     <ThunderforestMap
+  polygonPoints={polygonPoints}
+/>
       </View>
 
       <TouchableOpacity

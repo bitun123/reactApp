@@ -4,13 +4,11 @@ import { View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 type Props = {
-  latitude: number;
-  longitude: number;
+  polygonPoints: number[][];
 };
 
 const ThunderforestMap = ({
-  latitude,
-  longitude,
+  polygonPoints,
 }: Props) => {
   const html = useMemo(
     () => `
@@ -37,34 +35,62 @@ html, body, #map {
 </head>
 
 <body>
+
 <div id="map"></div>
 
 <script>
-const map = L.map('map').setView(
-  [${latitude}, ${longitude}],
-  13
-);
+
+const polygonPoints = ${JSON.stringify(polygonPoints)};
+
+const map = L.map('map');
 
 L.tileLayer(
   'https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=2dc2810004344c96a819a939298e1046',
   {
     maxZoom: 22,
-    attribution: '&copy; OpenStreetMap contributors &copy; Thunderforest'
+    attribution:
+      '&copy; OpenStreetMap contributors &copy; Thunderforest'
   }
 ).addTo(map);
 
-L.marker([${latitude}, ${longitude}])
-  .addTo(map)
-  .bindPopup(
-    'Latitude: ${latitude}<br/>Longitude: ${longitude}'
-  )
-  .openPopup();
+if (polygonPoints.length > 0) {
+
+  polygonPoints.forEach(point => {
+    L.marker(point).addTo(map);
+  });
+
+  if (polygonPoints.length >= 3) {
+
+    const polygon = L.polygon(
+      polygonPoints,
+      {
+        color: 'red',
+        weight: 3,
+        fillColor: '#ff0000',
+        fillOpacity: 0.3,
+      }
+    ).addTo(map);
+
+    map.fitBounds(
+      polygon.getBounds()
+    );
+
+  } else {
+
+    map.setView(
+      polygonPoints[0],
+      13
+    );
+
+  }
+}
+
 </script>
 
 </body>
 </html>
 `,
-    [latitude, longitude],
+    [polygonPoints],
   );
 
   return (
