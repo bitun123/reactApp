@@ -44,6 +44,16 @@ const polygonPoints = points
     Number(p.lat),
     Number(p.lng),
   ]) as number[][];
+
+  const removePoint = (index: number) => {
+  if (points.length === 1) {
+    return;
+  }
+
+  setPoints(prev =>
+    prev.filter((_, i) => i !== index),
+  );
+};
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>User Directory App</Text>
@@ -66,14 +76,12 @@ const polygonPoints = points
           View user profile and location information.
         </Text>
       </View>
-
-      <Text style={styles.mapTitle}>Enter Location </Text>
+ <Text style={styles.mapTitle}>Enter Location </Text>
 
 {points.map((point, index) => (
   <View key={index}>
-    <Text style={{ fontWeight: '700' }}>
-      Location {index + 1}
-    </Text>
+
+    <Text>Location {index + 1}</Text>
 
     <TextInput
       style={styles.input}
@@ -96,6 +104,16 @@ const polygonPoints = points
         setPoints(copy);
       }}
     />
+
+    <TouchableOpacity
+      style={styles.removeButton}
+      onPress={() => removePoint(index)}
+    >
+      <Text style={styles.removeButtonText}>
+        Remove Location
+      </Text>
+    </TouchableOpacity>
+
   </View>
 ))}
 
@@ -107,6 +125,7 @@ const polygonPoints = points
     Add Point
   </Text>
 </TouchableOpacity>
+
 
       <View style={{ height: 400 }}>
      <ThunderforestMap
@@ -192,5 +211,17 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '700',
   },
+  removeButton: {
+  backgroundColor: '#EF4444',
+  paddingVertical: 10,
+  borderRadius: 8,
+  alignItems: 'center',
+  marginBottom: 15,
+},
+
+removeButtonText: {
+  color: '#FFFFFF',
+  fontWeight: '700',
+},
 });
 
