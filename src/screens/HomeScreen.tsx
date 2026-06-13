@@ -7,7 +7,10 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  PermissionsAndroid,
 } from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+
 
 import ThunderforestMap from '../components/ThunderforestMap';
 
@@ -52,6 +55,58 @@ const polygonPoints = points
 
   setPoints(prev =>
     prev.filter((_, i) => i !== index),
+  );
+};
+
+
+const requestLocationPermission = async () => {
+  const granted =
+    await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+  return (
+    granted ===
+    PermissionsAndroid.RESULTS.GRANTED
+  );
+};
+
+
+const getCurrentLocation = async () => {
+  const hasPermission =
+    await requestLocationPermission();
+
+  if (!hasPermission) {
+    return;
+  }
+
+  Geolocation.getCurrentPosition(
+    position => {
+
+      const latitude =
+        position.coords.latitude;
+
+      const longitude =
+        position.coords.longitude;
+
+      setPoints(prev => [
+        ...prev,
+        {
+          lat: latitude.toString(),
+          lng: longitude.toString(),
+        },
+      ]);
+    },
+
+    error => {
+      console.log(error);
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 10000,
+    },
   );
 };
   return (
@@ -115,7 +170,7 @@ const polygonPoints = points
     </TouchableOpacity>
 
   </View>
-))}
+))} 
 
 <TouchableOpacity
   style={styles.button}
@@ -126,6 +181,14 @@ const polygonPoints = points
   </Text>
 </TouchableOpacity>
 
+<TouchableOpacity
+  style={styles.button}
+  onPress={getCurrentLocation}
+>
+  <Text style={styles.buttonText}>
+    Use My Current Location
+  </Text>
+</TouchableOpacity>
 
       <View style={{ height: 400 }}>
      <ThunderforestMap
