@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,14 @@ import {
   ScrollView,
   TextInput,
   PermissionsAndroid,
+  Alert 
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
+import DeviceInfo from 'react-native-device-info';
 
 
 import ThunderforestMap from '../components/ThunderforestMap';
+import { Linking } from 'react-native';
 
 const HomeScreen = ({ navigation }: any) => {
 
@@ -109,6 +112,42 @@ const getCurrentLocation = async () => {
     },
   );
 };
+
+  const checkForUpdate = () => {
+    const currentVersion = DeviceInfo.getVersion();
+
+    const latestVersion = '1.1.0';
+
+    if (currentVersion !== latestVersion) {
+      Alert.alert(
+        'Update Available',
+        'A new version of the app is available.',
+        [
+          {
+            text: 'Later',
+            style: 'cancel',
+          },
+          {
+            text: 'Update',
+            onPress: () => {
+              console.log('Navigate to Play Store');
+                Linking.openURL(
+    'https://play.google.com/store/apps/details?id=com.reactapp'
+  );
+            },
+          },
+        ],
+      );
+    }
+  };
+
+  useEffect(() => {
+      console.log(
+    'Current Version:',
+    DeviceInfo.getVersion(),
+  );
+    checkForUpdate();
+  }, []);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>User Directory App</Text>
