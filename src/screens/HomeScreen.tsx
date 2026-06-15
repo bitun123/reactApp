@@ -14,6 +14,7 @@ import Geolocation from 'react-native-geolocation-service';
 import DeviceInfo from 'react-native-device-info';
 
 
+
 import ThunderforestMap from '../components/ThunderforestMap';
 import { Linking } from 'react-native';
 
