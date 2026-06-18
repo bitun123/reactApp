@@ -44,6 +44,11 @@ const polygonPoints = ${JSON.stringify(polygonPoints)};
 
 const map = L.map('map');
 
+map.setView(
+  [22.5726, 88.3639],
+  10
+);
+
 L.tileLayer(
   'https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=2dc2810004344c96a819a939298e1046',
   {
@@ -95,13 +100,19 @@ if (polygonPoints.length > 0) {
 
   return (
     <View style={{ flex: 1 }}>
-      <WebView
-        originWhitelist={['*']}
-        source={{ html }}
-        javaScriptEnabled
-        domStorageEnabled
-        mixedContentMode="always"
-      />
+  <WebView
+  originWhitelist={['*']}
+  source={{ html }}
+  javaScriptEnabled={true}
+  domStorageEnabled={true}
+  mixedContentMode="always"
+  onError={e =>
+    console.log(
+      'WEBVIEW ERROR',
+      e.nativeEvent,
+    )
+  }
+/>
     </View>
   );
 };

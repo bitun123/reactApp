@@ -12,13 +12,15 @@ import {
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import DeviceInfo from 'react-native-device-info';
-
-
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { MainTabsParamList } from '../navigation/AppNavigator';
 
 import ThunderforestMap from '../components/ThunderforestMap';
 import { Linking } from 'react-native';
 
-const HomeScreen = ({ navigation }: any) => {
+type Props = BottomTabScreenProps<MainTabsParamList, 'Home'>;
+
+const HomeScreen = ({ navigation }: Props) => {
 
   const [points, setPoints] = useState([
   {
@@ -143,12 +145,14 @@ const getCurrentLocation = async () => {
   };
 
   useEffect(() => {
-      console.log(
-    'Current Version:',
-    DeviceInfo.getVersion(),
-  );
+    console.log('[DEBUG] HomeScreen mounted.');
+    console.log('[DEBUG] HomeScreen navigation state:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
+    console.log(
+      'Current Version:',
+      DeviceInfo.getVersion(),
+    );
     checkForUpdate();
-  }, []);
+  }, [navigation]);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>User Directory App</Text>
@@ -236,14 +240,21 @@ const getCurrentLocation = async () => {
 />
       </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Profile')}
-      >
-        <Text style={styles.buttonText}>
-          View Users
-        </Text>
-      </TouchableOpacity>
+    <TouchableOpacity
+  style={styles.button}
+  onPress={() => {
+    console.log('[DEBUG] View Users button clicked on HomeScreen.');
+    console.log('[DEBUG] HomeScreen navigation state before navigate:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
+    console.log('Before Navigate');
+    navigation.navigate('Users', { screen: 'Profile' });
+
+     console.log('After Navigate');
+  }}
+>
+  <Text style={styles.buttonText}>
+    View Users
+  </Text>
+</TouchableOpacity>
     </ScrollView>
   );
 };

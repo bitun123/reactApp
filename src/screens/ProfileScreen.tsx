@@ -8,12 +8,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { ProfileStackParamList } from '../navigation/AppNavigator';
 
-interface User {
+export interface User {
   id: number;
   name: string;
-  username: string;
   email: string;
+  username: string;
   phone: string;
   website: string;
   company: {
@@ -25,11 +27,19 @@ interface User {
 }
 
 const ProfileScreen = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'Profile'>>();
 
-  const [users, setUsers] = useState<User[]>([]);
+const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    console.log('[DEBUG] ProfileScreen mounted.');
+    console.log('[DEBUG] ProfileScreen navigation state:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
+    fetchUsers();
+  }, [navigation]);
+useEffect(() => {
+  console.log('PROFILE SCREEN MOUNTED');
+}, []);
   const fetchUsers = async () => {
     try {
       const response = await fetch(
@@ -45,37 +55,28 @@ const ProfileScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+const handleUserPress = (user: User) => {
+  console.log('[DEBUG] User card clicked in ProfileScreen. Navigating to UserDetails with user:', JSON.stringify(user));
+  console.log('[DEBUG] ProfileScreen navigation state before navigate:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
+  navigation.navigate('UserDetails', {
+    user,
+  });
+};
 
-  const renderUser = ({ item }: { item: User }) => (
+  const renderUser = ({ item }: any) => (
     <TouchableOpacity
       style={styles.card}
-      activeOpacity={0.8}
-      onPress={() =>
-        navigation.navigate('UserDetails', {
-          user: item,
-        })
-      }>
-      <View style={styles.header}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {item.name.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+      onPress={() => handleUserPress(item)}
+    >
+      <Text style={styles.name}>
+        {item.name}
+      </Text>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.username}>@{item.username}</Text>
-        </View>
-      </View>
+      <Text>{item.email}</Text>
 
-      <View style={styles.divider} />
+      <Text>{item.company.name}</Text>
 
-      <Text style={styles.value}>{item.email}</Text>
-      <Text style={styles.value}>{item.company.name}</Text>
-      <Text style={styles.value}>{item.address.city}</Text>
+      <Text>{item.address.city}</Text>
     </TouchableOpacity>
   );
 
@@ -90,9 +91,12 @@ const ProfileScreen = () => {
   return (
     <FlatList
       data={users}
-      keyExtractor={item => item.id.toString()}
+      keyExtractor={item => item.id.toString()
+      }
       renderItem={renderUser}
-      contentContainerStyle={{ padding: 12 }}
+      contentContainerStyle={{
+        padding: 12,
+      }}
     />
   );
 };
@@ -108,53 +112,15 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    elevation: 5,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#2563EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  avatarText: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-
-  userInfo: {
-    marginLeft: 12,
+    borderRadius: 12,
+    elevation: 4,
   },
 
   name: {
     fontSize: 18,
     fontWeight: 'bold',
-  },
-
-  username: {
-    color: '#666',
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 12,
-  },
-
-  value: {
-    color: '#444',
-    marginBottom: 4,
+    marginBottom: 6,
   },
 });

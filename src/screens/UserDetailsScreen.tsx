@@ -1,8 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
+import type { ProfileStackParamList } from '../navigation/AppNavigator';
 
-const UserDetailsScreen = ({ route }: any) => {
-  const { user } = route.params;
+const UserDetailsScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'UserDetails'>>();
+  const route = useRoute<RouteProp<ProfileStackParamList, 'UserDetails'>>();
+  
+  React.useEffect(() => {
+    console.log('[DEBUG] UserDetailsScreen mounted.');
+    console.log('[DEBUG] UserDetailsScreen route.params:', JSON.stringify(route.params || {}));
+    console.log('[DEBUG] UserDetailsScreen navigation state:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
+  }, [route.params, navigation]);
+
+  const user = route.params?.user;
+
+  if (!user) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>No user details available.</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => {
+            console.log('[DEBUG] Fallback Go Back button clicked on UserDetailsScreen.');
+            navigation.goBack();
+          }}
+        >
+          <Text style={styles.backButtonText}>← Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -31,6 +61,16 @@ const UserDetailsScreen = ({ route }: any) => {
         <Text style={styles.label}>City</Text>
         <Text style={styles.value}>{user.address.city}</Text>
       </View>
+
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => {
+          console.log('[DEBUG] Back to Users button clicked on UserDetailsScreen.');
+          navigation.goBack();
+        }}
+      >
+        <Text style={styles.backButtonText}>← Back to Users</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -86,5 +126,34 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     marginTop: 4,
+  },
+
+  backButton: {
+    backgroundColor: '#2563EB',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+  },
+
+  backButtonText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  errorText: {
+    fontSize: 18,
+    color: '#EF4444',
+    marginBottom: 20,
+    textAlign: 'center',
   },
 });
