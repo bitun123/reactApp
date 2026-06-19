@@ -8,6 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import UserDetailsScreen from '../screens/UserDetailsScreen';
 import type { User } from '../screens/ProfileScreen';
+import { useTranslation } from 'react-i18next';
 
 export type ProfileStackParamList = {
   Profile: undefined;
@@ -28,13 +29,14 @@ const Tab = createBottomTabNavigator<MainTabsParamList>();
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 
 function ProfileStackNavigator() {
+  const { t } = useTranslation();
   return (
     <ProfileStack.Navigator>
       <ProfileStack.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          title: 'Users',
+          title: t('users'),
         }}
       />
 
@@ -42,7 +44,7 @@ function ProfileStackNavigator() {
         name="UserDetails"
         component={UserDetailsScreen}
         options={{
-          title: 'User Details',
+          title:t('userDetails'),
         }}
       />
     </ProfileStack.Navigator>
@@ -50,17 +52,22 @@ function ProfileStackNavigator() {
 }
 
 function MainTabsNavigator() {
+   const { t } = useTranslation();
   return (
     <Tab.Navigator>
       <Tab.Screen
         name="Home"
         component={HomeScreen}
+          options={{
+          title: t('home'),
+        }}
       />
 
       <Tab.Screen
         name="Users"
         component={ProfileStackNavigator}
         options={{
+          title: t('users'),
           headerShown: false,
         }}
       />

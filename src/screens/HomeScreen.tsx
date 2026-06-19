@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -8,135 +7,116 @@ import {
   ScrollView,
   TextInput,
   PermissionsAndroid,
-  Alert 
+  Alert,
+  Linking,
 } from 'react-native';
+
 import Geolocation from 'react-native-geolocation-service';
 import DeviceInfo from 'react-native-device-info';
+
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
+
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabsParamList } from '../navigation/AppNavigator';
 
 import ThunderforestMap from '../components/ThunderforestMap';
-import { Linking } from 'react-native';
 
 type Props = BottomTabScreenProps<MainTabsParamList, 'Home'>;
 
 const HomeScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation();
 
   const [points, setPoints] = useState([
-  {
-    lat: '',
-    lng: '',
-  },
-]);
-
-// For demonstration, this function adds a new point to the list of points.
-  const addPoint = () => {
-  setPoints(prev => [
-    ...prev,
     {
       lat: '',
       lng: '',
     },
   ]);
-};
 
-// This function converts the list of points into a format suitable for rendering a polygon on the map.
-const polygonPoints = points
-  .filter(
-    p =>
-      p.lat.trim() !== '' &&
-      p.lng.trim() !== '' &&
-      !isNaN(Number(p.lat)) &&
-      !isNaN(Number(p.lng)),
-  )
-  .map(p => [
-    Number(p.lat),
-    Number(p.lng),
-  ]) as number[][];
+  const addPoint = () => {
+    setPoints(prev => [
+      ...prev,
+      {
+        lat: '',
+        lng: '',
+      },
+    ]);
+  };
 
   const removePoint = (index: number) => {
-  if (points.length === 1) {
-    return;
-  }
+    if (points.length === 1) {
+      return;
+    }
 
-  setPoints(prev =>
-    prev.filter((_, i) => i !== index),
-  );
-};
+    setPoints(prev => prev.filter((_, i) => i !== index));
+  };
 
+  const polygonPoints = points
+    .filter(
+      p =>
+        p.lat.trim() !== '' &&
+        p.lng.trim() !== '' &&
+        !isNaN(Number(p.lat)) &&
+        !isNaN(Number(p.lng)),
+    )
+    .map(p => [Number(p.lat), Number(p.lng)]) as number[][];
 
-const requestLocationPermission = async () => {
-  const granted =
-    await PermissionsAndroid.request(
+  const requestLocationPermission = async () => {
+    const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     );
 
-  return (
-    granted ===
-    PermissionsAndroid.RESULTS.GRANTED
-  );
-};
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  };
 
+  const getCurrentLocation = async () => {
+    const hasPermission = await requestLocationPermission();
 
-const getCurrentLocation = async () => {
-  const hasPermission =
-    await requestLocationPermission();
+    if (!hasPermission) {
+      return;
+    }
 
-  if (!hasPermission) {
-    return;
-  }
-
-  Geolocation.getCurrentPosition(
-    position => {
-
-      const latitude =
-        position.coords.latitude;
-
-      const longitude =
-        position.coords.longitude;
-
-      setPoints(prev => [
-        ...prev,
-        {
-          lat: latitude.toString(),
-          lng: longitude.toString(),
-        },
-      ]);
-    },
-
-    error => {
-      console.log(error);
-    },
-
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 10000,
-    },
-  );
-};
+    Geolocation.getCurrentPosition(
+      position => {
+        setPoints(prev => [
+          ...prev,
+          {
+            lat: position.coords.latitude.toString(),
+            lng: position.coords.longitude.toString(),
+          },
+        ]);
+      },
+      error => {
+        console.log(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      },
+    );
+  };
 
   const checkForUpdate = () => {
     const currentVersion = DeviceInfo.getVersion();
-
     const latestVersion = '1.1.0';
 
     if (currentVersion !== latestVersion) {
       Alert.alert(
-        'Update Available',
-        'A new version of the app is available.',
+        t('updateAvailable'),
+        t('newVersionAvailable'),
         [
           {
-            text: 'Later',
+            text: t('later'),
             style: 'cancel',
           },
           {
-            text: 'Update',
+            text: t('update'),
             onPress: () => {
-              console.log('Navigate to Play Store');
-                Linking.openURL(
-    'https://play.google.com/store/apps/details?id=com.reactapp'
-  );
+              Linking.openURL(
+                'https://play.google.com/store/apps/details?id=com.reactapp',
+              );
             },
           },
         ],
@@ -145,116 +125,159 @@ const getCurrentLocation = async () => {
   };
 
   useEffect(() => {
-    console.log('[DEBUG] HomeScreen mounted.');
-    console.log('[DEBUG] HomeScreen navigation state:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
-    console.log(
-      'Current Version:',
-      DeviceInfo.getVersion(),
-    );
     checkForUpdate();
-  }, [navigation]);
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>User Directory App</Text>
+      <Text style={styles.title}>
+        {t('userDirectoryApp')}
+      </Text>
 
+      {/* Language Switcher */}
+      <View style={styles.languageContainer}>
+  <TouchableOpacity
+    style={[
+      styles.languageButton,
+      i18n.language === 'en' && styles.activeLanguageButton,
+    ]}
+    onPress={() => i18n.changeLanguage('en')}>
+    <Text
+      style={[
+        styles.languageButtonText,
+        i18n.language === 'en' && styles.activeLanguageButtonText,
+      ]}>
+      EN
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[
+      styles.languageButton,
+      i18n.language === 'hi' && styles.activeLanguageButton,
+    ]}
+    onPress={() => i18n.changeLanguage('hi')}>
+    <Text
+      style={[
+        styles.languageButtonText,
+        i18n.language === 'hi' && styles.activeLanguageButtonText,
+      ]}>
+      HI
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[
+      styles.languageButton,
+      i18n.language === 'bn' && styles.activeLanguageButton,
+    ]}
+    onPress={() => i18n.changeLanguage('bn')}>
+    <Text
+      style={[
+        styles.languageButtonText,
+        i18n.language === 'bn' && styles.activeLanguageButtonText,
+      ]}>
+      BN
+    </Text>
+  </TouchableOpacity>
+</View>
       <Text style={styles.subtitle}>
-        Browse users, view profile details, company information,
-        contact details, and more.
+        {t('browseUsersDescription')}
       </Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>📋 User Management</Text>
+        <Text style={styles.cardTitle}>
+          📋 {t('userManagement')}
+        </Text>
+
         <Text style={styles.cardText}>
-          View a list of users fetched from a remote API.
+          {t('userManagementDescription')}
         </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>👤 User Profiles</Text>
+        <Text style={styles.cardTitle}>
+          👤 {t('userProfiles')}
+        </Text>
+
         <Text style={styles.cardText}>
-          View user profile and location information.
+          {t('userProfilesDescription')}
         </Text>
       </View>
- <Text style={styles.mapTitle}>Enter Location </Text>
 
-{points.map((point, index) => (
-  <View key={index}>
-
-    <Text>Location {index + 1}</Text>
-
-    <TextInput
-      style={styles.input}
-      placeholder="Latitude"
-      value={point.lat}
-      onChangeText={text => {
-        const copy = [...points];
-        copy[index].lat = text;
-        setPoints(copy);
-      }}
-    />
-
-    <TextInput
-      style={styles.input}
-      placeholder="Longitude"
-      value={point.lng}
-      onChangeText={text => {
-        const copy = [...points];
-        copy[index].lng = text;
-        setPoints(copy);
-      }}
-    />
-
-    <TouchableOpacity
-      style={styles.removeButton}
-      onPress={() => removePoint(index)}
-    >
-      <Text style={styles.removeButtonText}>
-        Remove Location
+      <Text style={styles.mapTitle}>
+        {t('enterLocation')}
       </Text>
-    </TouchableOpacity>
 
-  </View>
-))} 
+      {points.map((point, index) => (
+        <View key={index}>
+          <Text>
+            {t('location')} {index + 1}
+          </Text>
 
-<TouchableOpacity
-  style={styles.button}
-  onPress={addPoint}
->
-  <Text style={styles.buttonText}>
-    Add Point
-  </Text>
-</TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder={t('latitude')}
+            value={point.lat}
+            onChangeText={text => {
+              const copy = [...points];
+              copy[index].lat = text;
+              setPoints(copy);
+            }}
+          />
 
-<TouchableOpacity
-  style={styles.button}
-  onPress={getCurrentLocation}
->
-  <Text style={styles.buttonText}>
-    Use My Current Location
-  </Text>
-</TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder={t('longitude')}
+            value={point.lng}
+            onChangeText={text => {
+              const copy = [...points];
+              copy[index].lng = text;
+              setPoints(copy);
+            }}
+          />
+
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => removePoint(index)}>
+            <Text style={styles.removeButtonText}>
+              {t('removeLocation')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={addPoint}>
+        <Text style={styles.buttonText}>
+          {t('addPoint')}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={getCurrentLocation}>
+        <Text style={styles.buttonText}>
+          {t('useCurrentLocation')}
+        </Text>
+      </TouchableOpacity>
 
       <View style={{ height: 400 }}>
-     <ThunderforestMap
-  polygonPoints={polygonPoints}
-/>
+        <ThunderforestMap polygonPoints={polygonPoints} />
       </View>
 
-    <TouchableOpacity
-  style={styles.button}
-  onPress={() => {
-    console.log('[DEBUG] View Users button clicked on HomeScreen.');
-    console.log('[DEBUG] HomeScreen navigation state before navigate:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
-    console.log('Before Navigate');
-    navigation.navigate('Users', { screen: 'Profile' });
-
-     console.log('After Navigate');
-  }}
->
-  <Text style={styles.buttonText}>
-    View Users
-  </Text>
-</TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          navigation.navigate('Users', {
+            screen: 'Profile',
+          })
+        }>
+        <Text style={styles.buttonText}>
+          {t('viewUsers')}
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -279,8 +302,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+  languageContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    justifyContent: 'space-between',
+  },
+
+  languageButton: {
+    flex: 1,
+    backgroundColor: '#10B981',
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    alignItems: 'center',
+  },
+
   card: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     padding: 15,
     borderRadius: 12,
     marginBottom: 15,
@@ -299,12 +337,12 @@ const styles = StyleSheet.create({
   mapTitle: {
     fontSize: 20,
     fontWeight: '700',
-    marginBottom: 10,
     marginTop: 10,
+    marginBottom: 10,
   },
 
   input: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#DDD',
     borderRadius: 10,
@@ -322,20 +360,37 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontWeight: '700',
   },
+
   removeButton: {
-  backgroundColor: '#EF4444',
-  paddingVertical: 10,
-  borderRadius: 8,
-  alignItems: 'center',
-  marginBottom: 15,
+    backgroundColor: '#EF4444',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+
+  removeButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+
+
+activeLanguageButton: {
+  backgroundColor: '#1D4ED8',
+  borderWidth: 2,
+  borderColor: '#0F172A',
 },
 
-removeButtonText: {
+languageButtonText: {
   color: '#FFFFFF',
-  fontWeight: '700',
+  fontWeight: '600',
+},
+
+activeLanguageButtonText: {
+  color: '#FFFFFF',
+  fontWeight: 'bold',
 },
 });
-

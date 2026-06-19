@@ -1,0 +1,58 @@
+
+  {
+  "userDirectoryApp": "User Directory App",
+  "browseUsersDescription": "Browse users, view profile details, company information, contact details, and more.",
+
+  "userManagement": "User Management",
+  "userManagementDescription": "View a list of users fetched from a remote API.",
+
+  "userProfiles": "User Profiles",
+  "userProfilesDescription": "View user profile and location information.",
+
+  "enterLocation": "Enter Location",
+  "location": "Location",
+
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+
+  "addPoint": "Add Point",
+  "removeLocation": "Remove Location",
+
+  "useCurrentLocation": "Use My Current Location",
+
+  "viewUsers": "View Users",
+
+  "updateAvailable": "Update Available",
+  "newVersionAvailable": "A new version of the app is available.",
+  "later": "Later",
+  "update": "Update",
+
+  "english": "English",
+  "hindi": "Hindi",
+  "bengali": "Bengali",
+
+  "loading": "Loading...",
+  "error": "Something went wrong",
+
+  "home": "Home",
+  "profile": "Profile",
+  "settings": "Settings",
+
+  "welcome": "Welcome",
+  "search": "Search",
+  "save": "Save",
+  "cancel": "Cancel",
+  "submit": "Submit",
+
+  "yes": "Yes",
+  "no": "No",
+
+  "success": "Success",
+  "failed": "Failed",
+
+  "retry": "Retry",
+  "close": "Close",
+  "users": "Users",
+  "userDetails": "User Details"
+
+}
