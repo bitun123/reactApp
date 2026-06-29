@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { ProfileStackParamList } from '../navigation/AppNavigator';
+import { useAuth } from '../context/AuthContext';
 
 export interface User {
   id: number;
@@ -28,8 +29,9 @@ export interface User {
 
 const ProfileScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'Profile'>>();
+  const { logout } = useAuth();
 
-const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,9 +39,11 @@ const [users, setUsers] = useState<User[]>([]);
     console.log('[DEBUG] ProfileScreen navigation state:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
     fetchUsers();
   }, [navigation]);
-useEffect(() => {
-  console.log('PROFILE SCREEN MOUNTED');
-}, []);
+
+  useEffect(() => {
+    console.log('PROFILE SCREEN MOUNTED');
+  }, []);
+
   const fetchUsers = async () => {
     try {
       const response = await fetch(
@@ -55,13 +59,13 @@ useEffect(() => {
     }
   };
 
-const handleUserPress = (user: User) => {
-  console.log('[DEBUG] User card clicked in ProfileScreen. Navigating to UserDetails with user:', JSON.stringify(user));
-  console.log('[DEBUG] ProfileScreen navigation state before navigate:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
-  navigation.navigate('UserDetails', {
-    user,
-  });
-};
+  const handleUserPress = (user: User) => {
+    console.log('[DEBUG] User card clicked in ProfileScreen. Navigating to UserDetails with user:', JSON.stringify(user));
+    console.log('[DEBUG] ProfileScreen navigation state before navigate:', navigation.getState ? JSON.stringify(navigation.getState(), null, 2) : 'No getState');
+    navigation.navigate('UserDetails', {
+      user,
+    });
+  };
 
   const renderUser = ({ item }: any) => (
     <TouchableOpacity
@@ -80,6 +84,15 @@ const handleUserPress = (user: User) => {
     </TouchableOpacity>
   );
 
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>Active Directory</Text>
+      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -91,9 +104,9 @@ const handleUserPress = (user: User) => {
   return (
     <FlatList
       data={users}
-      keyExtractor={item => item.id.toString()
-      }
+      keyExtractor={item => item.id.toString()}
       renderItem={renderUser}
+      ListHeaderComponent={renderHeader}
       contentContainerStyle={{
         padding: 12,
       }}
@@ -122,5 +135,32 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 6,
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    marginBottom: 12,
+  },
+
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+
+  logoutBtn: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+
+  logoutText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 13,
   },
 });
